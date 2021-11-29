@@ -1,0 +1,44 @@
+# This is a basic workflow to help you get started with Actions
+
+name: COVERAGE
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches: [ main ]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@master
+        
+      - name: Install
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: yarn
+  test:
+    name: Testing and Coverage
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@master
+        with:
+          # codecov.io requires a fetch depth > 1.
+          fetch-depth: 2
+        
+      - name: add chmod     
+        run: chmod -R 777 ./*
+    
+      - name: Test     
+        run: yarn test
+    
+      - name: Upload coverage to Codecov  
+        uses: codecov/codecov-action@v2.1.0
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+    needs: build
